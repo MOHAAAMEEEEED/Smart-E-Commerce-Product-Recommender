@@ -135,7 +135,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-e-commerce-env/S
+e-commerce-venv/
 # Spyder project settings
 .spyderproject
 .spyproject
