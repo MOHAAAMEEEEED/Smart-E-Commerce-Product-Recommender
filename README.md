@@ -1,255 +1,218 @@
-# Smart E-Commerce Product Recommender
+# E-commerce Recommendation System
 
-## Description
-A hybrid recommender system that suggests products based on both collaborative filtering and content-based filtering techniques. This system analyzes user behavior and product attributes to provide personalized product recommendations for e-commerce applications.
+A robust, end-to-end recommendation system for e-commerce applications, featuring multiple recommendation strategies and detailed evaluation. This project is based on the accompanying Jupyter notebook, which demonstrates the full workflow from data preparation to model evaluation and visualization.
 
-## Concepts Used
-- Collaborative filtering: Recommends products based on user similarities
-- Content-based filtering: Recommends products based on product attributes
-- Hybrid recommendation models: Combines multiple recommendation strategies
-- Ensemble-based methods: Uses weighted combination and cascade techniques
+## Project Introduction
 
-## Project Structure
-```
-smart_recommender/
-│
-├── 📁 data/
-│   └── amazon.csv                   # E-commerce product dataset
-│
-├── 📁 notebooks/
-│   ├── 01_data_exploration.ipynb    # Data analysis and exploration
-│   ├── 02_collaborative_filtering.ipynb # Collaborative filtering analysis
-│   ├── 03_content_based_filtering.ipynb # Content-based filtering analysis
-│   └── 04_hybrid_modeling.ipynb     # Hybrid model development
-│
-├── 📁 src/
-│   ├── __init__.py
-│   ├── load_data.py                 # Data loading and preprocessing
-│   │
-│   ├── 📁 models/
-│   │   ├── train_collaborative.py   # Collaborative model training
-│   │   ├── train_content.py         # Content-based model training
-│   │   └── train_hybrid.py          # Hybrid model training
-│   │
-│   ├── 📁 recommenders/
-│   │   ├── collaborative.py         # Collaborative recommender
-│   │   ├── content_based.py         # Content-based recommender
-│   │   └── hybrid.py                # Hybrid recommender
-│   │
-│   └── 📁 utils/
-│       ├── metrics.py               # Evaluation metrics
-│       └── visualization.py         # Data and results visualization
-│
-└── README.md
-```
+This project aims to provide a comprehensive recommendation system for e-commerce platforms, leveraging both content and user behavior to generate relevant product suggestions. The system is designed to be modular, allowing for experimentation with different recommendation algorithms and evaluation techniques. The included notebook walks through the entire process, including:
+- Data loading and preprocessing
+- Implementation of various recommendation strategies
+- Evaluation of recommendation quality
+- Visualization of results
 
-## Installation
+## Data Preparation
 
-# Requirements
-```bash
-pip install -r requirements.txt
-``
+The system expects a product dataset in TSV format with columns such as:
+- Uniq Id
+- Product Id
+- Product Rating
+- Product Reviews Count
+- Product Category
+- Product Brand
+- Product Name
+- Product Image Url
+- Product Description
+- Product Tags
 
-### Setup
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/smart-e-commerce-recommender.git
-cd smart-e-commerce-recommender
+**Preprocessing steps include:**
+- Loading the dataset into a pandas DataFrame
+- Cleaning and normalizing text fields (e.g., product descriptions, tags)
+- Handling missing values
+- Generating synthetic user ratings data for collaborative filtering (if real user data is not available)
 
-# Create a virtual environment (optional but recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+**Synthetic Data Generation:**
+For collaborative filtering, the notebook can create a synthetic ratings dataset by randomly assigning ratings from synthetic users to products, simulating real-world user behavior.
 
-# Install dependencies
-pip install -r requirements.txt
-```
+## Recommendation Strategies
 
-## Usage
+### 1. Content-Based Recommendations
+**Concept:**
+Recommends products similar to a given product by analyzing product features such as tags, description, and category. Uses NLP techniques (e.g., TF-IDF vectorization) to compute product similarity.
 
-### 1. Data Preparation
-Place your e-commerce data in the `data/` directory. The system expects a CSV file with at least the following columns:
-- `user_id`: Unique identifier for users
-- `product_id`: Unique identifier for products
-- `rating`: Numeric rating or interaction strength
+**Implementation:**
+- Vectorizes product features using TF-IDF or similar methods
+- Computes cosine similarity between products
+- Returns top-N most similar products to a given item
 
-You can also include optional columns like:
-- `timestamp`: When the interaction occurred
-- `title`: Product title
-- `description`: Product description
-- `category`: Product category
-
-### 2. Data Exploration
-```bash
-# Run the data exploration notebook
-jupyter notebook notebooks/01_data_exploration.ipynb
-```
-
-### 3. Train and Evaluate Models
-
-#### Train Collaborative Filtering Model
+**Example Usage:**
 ```python
-from src.models.train_collaborative import train_collaborative_model, prepare_surprise_data
-from src.load_data import load_amazon_data, preprocess_data
-
-# Load and preprocess data
-df = load_amazon_data()
-df = preprocess_data(df)
-
-# Prepare data for Surprise
-data = prepare_surprise_data(df)
-
-# Train the model
-model, metrics = train_collaborative_model(data, save_path='models/collaborative_model.pkl')
+recommend_products_content_based(item_name="OPI Nail Lacquer", product_df, n=5)
 ```
+**Expected Output:**
+A DataFrame of the top 5 products most similar to "OPI Nail Lacquer" with similarity scores.
 
-#### Train Content-Based Model
+### 2. Collaborative Filtering Recommendations
+**Concept:**
+Recommends products based on user behavior, leveraging the preferences of similar users. Uses matrix factorization (e.g., SVD) on the user-item ratings matrix.
+
+**Implementation:**
+- Builds a user-item ratings matrix (synthetic or real)
+- Applies matrix factorization to learn latent user and product features
+- Predicts ratings for unseen products for a given user
+- Returns top-N recommended products for the user
+
+**Example Usage:**
 ```python
-from src.models.train_content import create_item_features, build_content_model, compute_similarity_matrix
-
-# Create item features
-item_features = create_item_features(df)
-
-# Build content model
-vectorizer, item_matrix, item_ids = build_content_model(
-    item_features, 
-    save_path='models/content_model'
-)
-
-# Compute similarity matrix
-sim_matrix = compute_similarity_matrix(item_matrix, save_path='models/content_model')
+recommend_products_collaborative(user_id="user_0043", product_df, n=5)
 ```
+**Expected Output:**
+A DataFrame of the top 5 recommended products for the specified user, with predicted ratings.
 
-#### Train Hybrid Model
+### 3. Hybrid Recommendations
+**Concept:**
+Combines content-based and collaborative filtering approaches to leverage both product features and user behavior for more robust recommendations.
+
+**Implementation:**
+- Generates recommendations from both content-based and collaborative models
+- Merges and ranks results (e.g., by weighted score or intersection)
+- Returns top-N hybrid recommendations
+
+**Example Usage:**
 ```python
-from src.models.train_hybrid import train_hybrid_model
-
-# Train hybrid model
-hybrid_model = train_hybrid_model(
-    df=df,
-    collab_model_path='models/collaborative_model.pkl',
-    content_model_path='models/content_model',
-    strategy='weighted',  # Options: 'weighted', 'feature', 'switch', 'cascade'
-    save_path='models/hybrid_model'
-)
+recommend_products_hybrid(user_id="user_0043", item_name="OPI Nail Lacquer", product_df, n=5)
 ```
+**Expected Output:**
+A DataFrame of the top 5 hybrid recommendations for the user and item context.
 
-### 4. Make Recommendations
+### 4. Rating-Based (Trending) Recommendations
+**Concept:**
+Recommends trending products based on high ratings and review counts, independent of user or item context.
 
-#### Collaborative Recommendations
+**Implementation:**
+- Filters products by minimum rating and review count thresholds
+- Sorts by rating and popularity
+- Returns top-N trending products
+
+**Example Usage:**
 ```python
-from src.recommenders.collaborative import CollaborativeRecommender
+recommend_products_rating_based(product_df, min_rating=4.0, min_reviews=5, n=5)
+```
+**Expected Output:**
+A DataFrame of the top 5 trending products meeting the specified criteria.
 
-# Initialize recommender
-recommender = CollaborativeRecommender('models/collaborative_model.pkl')
+## Evaluation
 
-# Get recommendations for a user
-recommendations = recommender.recommend_items(user_id='user123', n_recommendations=5)
+The system includes robust evaluation metrics to assess recommendation quality:
+- **RMSE (Root Mean Squared Error):** Measures the average prediction error for ratings.
+- **MAE (Mean Absolute Error):** Measures the average absolute difference between predicted and actual ratings.
+- **Catalog Coverage:** Percentage of the product catalog that appears in recommendations.
+- **Precision/Recall:** (If implemented) Measures the relevance and completeness of recommendations.
+
+**Example Evaluation Output:**
+```
+Collaborative model evaluation:
+  RMSE: 1.54
+  MAE: 1.09
+  Test samples: 45
+  Catalog coverage (sample): 0.92%
 ```
 
-#### Content-Based Recommendations
-```python
-from src.recommenders.content_based import ContentBasedRecommender
+## Example Outputs & Visualizations
 
-# Initialize recommender
-recommender = ContentBasedRecommender(
-    vectorizer_path='models/content_model_vectorizer.pkl',
-    item_matrix_path='models/content_model_item_matrix.pkl',
-    similarity_matrix_path='models/content_model_similarity.pkl',
-    item_ids_path='models/content_model_item_ids.pkl'
-)
+The notebook provides sample outputs and visualizations, such as:
+- Printed tables of recommended products with scores/ratings
+- Plots of explained variance for matrix factorization models
+- Evaluation metric summaries
 
-# Get similar items
-similar_items = recommender.get_similar_items(item_id='product456')
-
-# Get recommendations based on user history
-user_history = {'product1': 5.0, 'product2': 4.0}  # Dict of {item_id: rating}
-recommendations = recommender.recommend_for_user_history(user_history)
+**Sample Output:**
+```
+Top 5 Content-Based Recommendations for 'OPI Nail Lacquer':
+| Product Name         | Similarity Score |
+|---------------------|-----------------|
+| ...                 | ...             |
 ```
 
-#### Hybrid Recommendations
-```python
-from src.recommenders.hybrid import HybridRecommender
+**Sample Plot:**
+- Explained variance plot for collaborative filtering
+- Bar chart of top recommended products
 
-# Initialize recommender
-recommender = HybridRecommender(
-    collab_model_path='models/collaborative_model.pkl',
-    content_model_path='models/content_model',
-    strategy='weighted'  # Options: 'weighted', 'switch', 'cascade'
-)
+## Notebook Usage
 
-# Get recommendations for a user
-user_history = {'product1': 5.0, 'product2': 4.0}
-recommendations = recommender.recommend_items(
-    user_id='user123',
-    user_history=user_history,
-    n_recommendations=5
-)
+To run the notebook:
+1. Open `e_commerce_reommendation.ipynb` in Jupyter Notebook or JupyterLab.
+2. Run all cells sequentially:
+   - Data loading and preprocessing
+   - Synthetic data generation (if needed)
+   - Model training and recommendation generation
+   - Evaluation and visualization
+3. Modify parameters (e.g., user_id, item_name, top_n) in the relevant cells to experiment with different scenarios.
+4. Review printed outputs and plots for insights.
 
-# Get explanation for a recommendation
-explanation = recommender.explain_recommendation(
-    user_id='user123',
-    item_id='product456',
-    user_history=user_history
-)
+## Command Line & Script Usage
+
+### Command Line Interface
+
+You can run the recommendation system from the command line using the `main.py` script:
+
+```
+python src/main.py --data_path data/marketing_sample_for_walmart_com-walmart_com_product_review__20200701_20201231__5k_data.tsv --recommendation_type hybrid --user_id 4 --item_name "OPI Nail Lacquer" --top_n 5
 ```
 
-### 5. Evaluate Models
-```python
-from src.utils.metrics import evaluate_recommender
-from src.load_data import load_amazon_data, split_train_test
+Available options:
+- `--data_path`: Path to the data file (required)
+- `--recommendation_type`: Type of recommendation system to use (`content_based`, `collaborative`, `hybrid`, or `rating_based`)
+- `--user_id`: User ID for collaborative and hybrid recommendations
+- `--item_name`: Item name for content-based and hybrid recommendations
+- `--top_n`: Number of recommendations to generate (default: 10)
+- `--min_rating`: Minimum rating threshold for rating-based recommendations (default: 0)
+- `--min_reviews`: Minimum number of reviews for rating-based recommendations (default: 0)
+- `--evaluate`: Evaluate the recommendation system instead of generating recommendations
 
-# Load data and split into train/test
-df = load_amazon_data()
-train_df, test_df = split_train_test(df)
+For convenience, you can also use the run.py script:
 
-# Evaluate recommender
-metrics = evaluate_recommender(recommender, test_df)
+```
+# Content-based recommendations
+python run.py --mode cli --recommendation_type content_based --item_name "OPI Nail Lacquer" --top_n 5
+
+# Collaborative filtering recommendations
+python run.py --mode cli --recommendation_type collaborative --user_id 4 --top_n 5
+
+# Hybrid recommendations
+python run.py --mode cli --recommendation_type hybrid --user_id 4 --item_name "OPI Nail Lacquer" --top_n 5
+
+# Rating-based recommendations (trending products)
+python run.py --mode cli --recommendation_type rating_based --min_rating 4.0 --min_reviews 5
+
+# Evaluate the recommendation system
+python run.py --mode cli --recommendation_type collaborative --evaluate
 ```
 
-### 6. Visualize Results
-```python
-from src.utils.visualization import plot_metrics_comparison, create_visualizations_for_data
+### Testing Individual Components
 
-# Create visualizations for your data
-create_visualizations_for_data(df)
+To test specific components of the system:
 
-# Compare model performances
-metrics_by_model = {
-    'Collaborative': collab_metrics,
-    'Content-based': content_metrics,
-    'Hybrid': hybrid_metrics
-}
-plot_metrics_comparison(metrics_by_model)
+```
+python run.py --mode test --test_module data
+python run.py --mode test --test_module content
+python run.py --mode test --test_module collaborative
+python run.py --mode test --test_module hybrid
+python run.py --mode test --test_module rating
+python run.py --mode test --test_module evaluation
 ```
 
-## Hybrid Strategies
+## Future Improvements
 
-The system supports multiple hybrid recommendation strategies:
-
-### 1. Weighted
-Combines scores from both models using weighted average. Default weights are 0.7 for collaborative and 0.3 for content-based.
-
-### 2. Switching
-Dynamically switches between collaborative and content-based recommendations based on certain conditions.
-
-### 3. Cascade
-Uses a sequential approach where one recommender filters candidates and the other re-ranks them.
-
-### 4. Feature-based
-Treats recommendations from individual models as features and uses a meta-model to make the final prediction.
-
-## Metrics
-
-The system evaluates recommendations using standard metrics:
-
-- RMSE (Root Mean Square Error)
-- Precision@K
-- Recall@K
-- NDCG@K (Normalized Discounted Cumulative Gain)
-- MAP (Mean Average Precision)
-- Coverage
-- Diversity
-- Novelty
+- Add more advanced recommendation algorithms (e.g., matrix factorization, deep learning)
+- Implement A/B testing functionality
+- Add real-time recommendation capabilities
+- Improve the web interface with user authentication and personalization
+- Add support for more data sources and formats
 
 ## License
-MIT
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Dataset source: [Walmart.com Product Reviews](https://www.kaggle.com/datasets/walmart-us-e-commerce-dataset)
+
