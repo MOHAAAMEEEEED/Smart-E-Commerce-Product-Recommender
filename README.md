@@ -139,5 +139,5 @@ To run the notebook:
 
 ## Acknowledgments
 
-- Dataset source: [Walmart.com Product Reviews](https://www.kaggle.com/datasets/walmart-us-e-commerce-dataset)
+- Dataset source: [Walmart.com Product Reviews](https://www.kaggle.com/datasets/promptcloud/walmart-product-review-dataset)
 
