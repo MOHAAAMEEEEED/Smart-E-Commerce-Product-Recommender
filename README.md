@@ -124,17 +124,6 @@ The notebook provides sample outputs and visualizations, such as:
 - Plots of explained variance for matrix factorization models
 - Evaluation metric summaries
 
-**Sample Output:**
-```
-Top 5 Content-Based Recommendations for 'OPI Nail Lacquer':
-| Product Name         | Similarity Score |
-|---------------------|-----------------|
-| ...                 | ...             |
-```
-
-**Sample Plot:**
-- Explained variance plot for collaborative filtering
-- Bar chart of top recommended products
 
 ## Notebook Usage
 
@@ -147,70 +136,6 @@ To run the notebook:
    - Evaluation and visualization
 3. Modify parameters (e.g., user_id, item_name, top_n) in the relevant cells to experiment with different scenarios.
 4. Review printed outputs and plots for insights.
-
-## Command Line & Script Usage
-
-### Command Line Interface
-
-You can run the recommendation system from the command line using the `main.py` script:
-
-```
-python src/main.py --data_path data/marketing_sample_for_walmart_com-walmart_com_product_review__20200701_20201231__5k_data.tsv --recommendation_type hybrid --user_id 4 --item_name "OPI Nail Lacquer" --top_n 5
-```
-
-Available options:
-- `--data_path`: Path to the data file (required)
-- `--recommendation_type`: Type of recommendation system to use (`content_based`, `collaborative`, `hybrid`, or `rating_based`)
-- `--user_id`: User ID for collaborative and hybrid recommendations
-- `--item_name`: Item name for content-based and hybrid recommendations
-- `--top_n`: Number of recommendations to generate (default: 10)
-- `--min_rating`: Minimum rating threshold for rating-based recommendations (default: 0)
-- `--min_reviews`: Minimum number of reviews for rating-based recommendations (default: 0)
-- `--evaluate`: Evaluate the recommendation system instead of generating recommendations
-
-For convenience, you can also use the run.py script:
-
-```
-# Content-based recommendations
-python run.py --mode cli --recommendation_type content_based --item_name "OPI Nail Lacquer" --top_n 5
-
-# Collaborative filtering recommendations
-python run.py --mode cli --recommendation_type collaborative --user_id 4 --top_n 5
-
-# Hybrid recommendations
-python run.py --mode cli --recommendation_type hybrid --user_id 4 --item_name "OPI Nail Lacquer" --top_n 5
-
-# Rating-based recommendations (trending products)
-python run.py --mode cli --recommendation_type rating_based --min_rating 4.0 --min_reviews 5
-
-# Evaluate the recommendation system
-python run.py --mode cli --recommendation_type collaborative --evaluate
-```
-
-### Testing Individual Components
-
-To test specific components of the system:
-
-```
-python run.py --mode test --test_module data
-python run.py --mode test --test_module content
-python run.py --mode test --test_module collaborative
-python run.py --mode test --test_module hybrid
-python run.py --mode test --test_module rating
-python run.py --mode test --test_module evaluation
-```
-
-## Future Improvements
-
-- Add more advanced recommendation algorithms (e.g., matrix factorization, deep learning)
-- Implement A/B testing functionality
-- Add real-time recommendation capabilities
-- Improve the web interface with user authentication and personalization
-- Add support for more data sources and formats
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
 
